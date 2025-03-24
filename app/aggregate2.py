@@ -105,7 +105,7 @@ for tm in teams_name:
     team_avg={} #reset all container
     team_sts={}
     
-print(t_list)
+#print(t_list)
 
 """team_avg['s']=t_list 
 team_stats.append(team_avg)
@@ -117,7 +117,88 @@ team_avg={}"""
 
 #print(team_stats)  
 #print(stat_and_pos("СЭЛЭНГЭ БОДОНС","t_rebound"))
+def two_team_meeting(team1,team2,limit):
+  two_avg_stat=games_col.aggregate([
+    {
+        '$match':
+          {
+            '$or': [
+                {
+                    '$and':
+                      [{'t1_name': team1 }, {'t2_name': team2}]
+                }, {
+                    '$and': 
+                     [{'t1_name': team2 }, {'t2_name': team1}]
+                }
+            ]
+          }
+    }, 
+    {
+        '$sort': {'date': -1}
+    }, {
+        '$limit': limit
+    }, 
+    {
+        '$addFields': {
+            't1_ner': team1,
+            't1_stats': {
+                '$cond': 
+                [
+                    {'$eq': ['$t1_name', team1] }, '$team1_stat', '$team2_stat'
+                ]
+            }
+        }
+    }, 
+       
+    {'$group': {
+      '_id': "$t1_ner",
+      'avg_points': { '$avg': "$t1_stats.t_points" },
+      'avg_fg_percent': { '$avg': "$t1_stats.t_fg_percent" },
+      'avg_two_p_percent': { '$avg': "$t1_stats.t_two_p_percent" },
+      'avg_three_p_percent': { '$avg': "$t1_stats.t_three_p_percent" },
+      'avg_ft_percent': { '$avg': "$t1_stats.t_ft_percent" },
+      'avg_offensive': { '$avg': "$t1_stats.t_offensive" },
+      'avg_defensive': { '$avg': "$t1_stats.t_defensive" },
+      'avg_rebound': { '$avg': "$t1_stats.t_rebound" },
+      'avg_assist': { '$avg': "$t1_stats.t_assist" },
+      'avg_turnover': { '$avg': "$t1_stats.t_turnover" },
+      'avg_steal': { '$avg': "$t1_stats.t_steal" },
+      'avg_block': { '$avg': "$t1_stats.t_block" },
+      'avg_foul': { '$avg': "$t1_stats.t_foul" }, 
+      'avg_pts_f_to': { '$avg': "$t1_stats.pts_f_to" },
+      'avg_pts_paint': { '$avg': "$t1_stats.pts_paint" },
+      'avg_two_c_p': { '$avg': "$t1_stats.two_c_p" },
+      'avg_pts_fast': { '$avg': "$t1_stats.pts_fast" },
+      'avg_pts_bench': { '$avg': "$t1_stats.pts_bench" }
+      }
+    } ,
+    {
+        '$project': {
+            'date': 1, 
+            't1_ner': 1, 
+            'avg_points': { '$round': ["$avg_points", 1] },
+            'avg_fg_percent': { '$round': ["$avg_fg_percent", 1] },
+            'avg_two_p_percent': { '$round': ["$avg_two_p_percent", 1] },
+            'avg_three_p_percent': { '$round': ["$avg_three_p_percent", 1] },
+            'avg_ft_percent': { '$round': ["$avg_ft_percent", 1] },
+            'avg_offensive': { '$round': ["$avg_offensive", 1] },
+            'avg_defensive': { '$round': ["$avg_defensive", 1] },
+            'avg_rebound': { '$round': ["$avg_rebound", 1] },
+            'avg_assist': { '$round': ["$avg_assist", 1] },
+            'avg_turnover': { '$round': ["$avg_turnover", 1] },
+            'avg_steal': { '$round': ["$avg_steal", 1] },
+            'avg_block': { '$round': ["$avg_block", 1] },
+            'avg_foul': { '$round': ["$avg_foul", 1] },
+            'avg_pts_f_to': { '$round': ["$avg_pts_f_to", 1] },
+            'avg_pts_paint': { '$round': ["$avg_pts_paint", 1] },
+            'avg_two_c_p': { '$round': ["$avg_two_c_p", 1] },
+            'avg_pts_fast': { '$round': ["$avg_pts_fast", 1] },
+            'avg_pts_bench': { '$round': ["$avg_pts_bench", 1] }
+        }
+    }
+  ])
+  return two_avg_stat  
 
-
-
-
+rs=two_team_meeting("ЗАВХАН BROTHERS","ХАСЫН ХҮЛЭГҮҮД",4)
+for gg in rs:
+    print(gg)
