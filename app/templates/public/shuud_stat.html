@@ -1,0 +1,304 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %} Player Stat Live {% endblock %}
+
+{% block main %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>Шууд дамжуулж буй тоглолт</h1>
+            <hr>
+            
+            <div class="mb-3">
+                <form action="/deedleague/update" method="get" >   <!--  target="_blank" -->
+                    <div class="form-group">
+                        <label for="name1">Current game live stat link:</label>
+                        <div class="col-xs-12">  
+                            
+                            <input type="text" class="form-control" id="name1" widht="60%" name="name1" placeholder="Enter current game URL" >
+                            <input type="submit" value="Submit">
+                        </div>
+                    <hr>    
+                    </div>
+                </form> 
+                 
+                    <h4>HOME TEAM---- {{home_short}} </h4>
+                    <input type="checkbox" name="stat" value="1">PTS
+                    <input type="checkbox" name="stat" value="2">FG
+                    <input type="checkbox" name="stat" value="3">FG%
+                    <input type="checkbox" name="stat" value="4">2pt
+                    <input type="checkbox" name="stat" value="5">2pt%
+                    <input type="checkbox" name="stat" value="6">3pt
+                    <input type="checkbox" name="stat" value="7">3pt%
+                    <input type="checkbox" name="stat" value="8">FT
+                    <input type="checkbox" name="stat" value="9">FT%
+                    <input type="checkbox" name="stat" value="10">REB
+                    <input type="checkbox" name="stat" value="11">AST
+                    <input type="checkbox" name="stat" value="12">TO
+                    <input type="checkbox" name="stat" value="13">STL
+                    <input type="checkbox" name="stat" value="14">BLCK
+                    <input type="checkbox" name="stat" value="15">MIN/PLUS
+
+                    <table id="myTable" class="display">
+                       <thead>
+                        <tr> 
+                            <th>Num</th>
+                            <th>Name</th>
+                            <th>Оноо</th>
+                            <th>Довт</th>
+                            <th>Довт%</th>
+                            <th>2pt</th>
+                            <th>2pt%</th>
+                            <th>3pt</th>
+                            <th>3pt%</th>
+                            <th>FT</th>
+                            <th>Ft%</th>
+                            <th>reb</th>
+                            <th>ast</th>
+                            <th>to</th>
+                            <th>stl</th>
+                            <th>block</th>
+                            <th>+/-</th>
+                        </tr>  
+                       </thead>   
+                    {% for k in h_team %}  
+                        
+                       <tr> 
+                        {% for key,value in k.items() %}
+                         <td>{{value}}</td> 
+                        {% endfor%}
+                        </tr>
+                    {% endfor %}    
+                    
+                    </table>   
+                    <h4>AWAY TEAM-----{{away_short}}</h4>
+                    <input type="checkbox" name="away_stat" value="1">PTS
+                    <input type="checkbox" name="away_stat" value="2">FG
+                    <input type="checkbox" name="away_stat" value="3">FG%
+                    <input type="checkbox" name="away_stat" value="4">2pt
+                    <input type="checkbox" name="away_stat" value="5">2pt%
+                    <input type="checkbox" name="away_stat" value="6">3pt
+                    <input type="checkbox" name="away_stat" value="7">3pt%
+                    <input type="checkbox" name="away_stat" value="8">FT
+                    <input type="checkbox" name="away_stat" value="9">FT%
+                    <input type="checkbox" name="away_stat" value="10">REB
+                    <input type="checkbox" name="away_stat" value="11">AST
+                    <input type="checkbox" name="away_stat" value="12">TO
+                    <input type="checkbox" name="away_stat" value="13">STL
+                    <input type="checkbox" name="away_stat" value="14">BLCK
+                    <input type="checkbox" name="away_stat" value="15">MIN/PLUS
+                    <table id="awayTable" class="display">
+                        <thead>
+                         <tr> 
+                            <th>Num</th>
+                            <th>Name</th>
+                            <th>Оноо</th>
+                            <th>Довт</th>
+                            <th>Довт%</th>
+                            <th>2pt</th>
+                            <th>2pt%</th>
+                            <th>3pt</th>
+                            <th>3pt%</th>
+                            <th>FT</th>
+                            <th>Ft%</th>
+                            <th>reb</th>
+                            <th>ast</th>
+                            <th>to</th>
+                            <th>stl</th>
+                            <th>block</th>
+                            <th>+/-</th>
+                         </tr>  
+                        </thead>   
+                     {% for k in a_team %}  
+                        <tbody> 
+                        <tr> 
+                         {% for key,value in k.items() %}
+                          <td>{{value}}</td> 
+                         {% endfor%}
+                         </tr>
+                         </tbody>
+                     {% endfor %}    
+                     </ul> 
+                     </table>  
+                    
+                    
+        
+                
+            </div>           
+        </div>        
+    </div>
+</div>   
+{% endblock%}   
+{% block script %}
+<script>
+    //Stat-iin deer haragdah Title-уудын нэршил
+     const stat_title = {1:'pts',2:'fg', 3: 'fgp',  4: '2p', 5: '2pp', 6: '3p', 7: '3pp',8: 'ft', 9: 'ftp',
+     10:'reb', 11: 'ast', 12:'to', 13: 'stl', 14:'blck', 15: 'pl_min' }
+    $(document).ready( function () {
+            var atable=$('#myTable').DataTable(
+                            {paging: true,
+                            pageLength: 50,
+                            scrollY: '50vh',
+                            scrollCollapse: true});
+                            } ); 
+    // table row дарахад тоглогчийг сонгоод стат хадгална
+    $('#myTable tbody').on( 'click', 'tr', function (e) {
+        //Below Line of Code will give full line of selected on clicked row in datatable
+        e.currentTarget.classList.toggle('selected');
+        var tableData = $(this).children("td").map(function () {
+            return $(this).text(); }).get();
+            
+            //checkbox-д харгалзах нэрс
+           
+            let checkboxes = document.getElementsByName('stat');
+            let result =new Array();
+            //check hiigdsen утгуудыг result  array хадгална
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    result.push(checkboxes[i].value);
+                }
+            }
+            //Харгалзах утгад хамаарах title-уудыг сонгоно 
+            const st_titles = result.map(equip => stat_title[equip] || '' );
+            //Row-iin DataTable array hargalzah index-iig olno Deed tal ni 5 stat baij bolno
+            let index1=Math.floor(result[0])+1
+            let index2=Math.floor(result[1])+1
+            let index3=Math.floor(result[2])+1
+            let index4=Math.floor(result[3])+1
+            let index5=Math.floor(result[4])+1
+            
+            //alert("Your data is: " + $.trim(tableData[index1]) + " , " + $.trim(tableData[index2]) + " , " + $.trim(tableData[index3]));  
+            // alert(st_titles)
+            /*for(let [index,j] of st_titles.entries){
+                var objName='stat_title'+index
+
+            }*/
+
+            var entry={
+            plr_num: $.trim(tableData[0]), 
+            plr_name: $.trim(tableData[1]), 
+            stat_title1: st_titles[0],   
+            stat_title2: st_titles[1],
+            stat_title3: st_titles[2],
+            stat_title4: st_titles[3],
+            stat_title5: st_titles[4],
+
+            stat1:$.trim(tableData[index1]),
+            stat2:$.trim(tableData[index2]),
+            stat3:$.trim(tableData[index3]),
+            stat4:$.trim(tableData[index4]),
+            stat5:$.trim(tableData[index5]),
+            message:"home_stat"
+            }; 
+            //check data flow
+            /*for (i in entry) {
+                alert("Name: " + i + " Value: " + entry[i]);} */
+            fetch(`${window.origin}/h_plr_stat`,{
+                method:"PATCH",
+                credentials:"include",
+                body: JSON.stringify(entry),
+                cache: "no-cache",
+                headers: new Headers({
+                    "content-type":"application/json"
+                })
+    
+            }) 
+            .then(function(response){
+                if (response.status!==200){
+                    console.log(`Response status was not 200 "${response.status}`);
+                    alert("aldaa")
+                    return;
+                }
+                response.json().then(function (data){
+                    console.log(data)
+                })
+            })
+
+        //Below Line of Code will give column data [0] mean first column
+        // alert( table.row( this ).data()[0] );
+    });  
+    /////////////-------------------------------------Away Team Parts----------------------------                                                 
+    $(document).ready( function () {
+                        $('#awayTable').DataTable(
+                           {paging: true,
+                            pageLength: 50,
+                            scrollY: '50vh',
+                            scrollCollapse: true,
+                            columns: [null,null, {orderable: false}, {orderable: false}, null, null, null,null, null,null,null,null, null,null, null,null,null],
+                            rowGroup: {dataSrc: '0',startRender: function ( rows, group ) {return group +' ('+rows.count()+' stekTypen)'}},
+                            select: { items: 'row', style:'single' }});
+                                                } );   
+    $('#awayTable tbody').on( 'click', 'tr', function (e) {
+        //Below Line of Code will give full line of selected on clicked row in datatable
+        e.currentTarget.classList.toggle('selected');
+        var tableData = $(this).children("td").map(function () {
+            return $(this).text(); }).get();
+            
+            //checkbox-д харгалзах нэрс
+           
+            let checkboxes = document.getElementsByName('away_stat');
+            let result =new Array();
+            //check hiigdsen утгуудыг result  array хадгална
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    result.push(checkboxes[i].value);
+                }
+            }
+            //Харгалзах утгад хамаарах title-уудыг сонгоно 
+            const st_titles = result.map(equip => stat_title[equip] || '' );
+            //Row-iin DataTable array hargalzah index-iig olno Deed tal ni 5 stat baij bolno
+            let index1=Math.floor(result[0])+1
+            let index2=Math.floor(result[1])+1
+            let index3=Math.floor(result[2])+1
+            let index4=Math.floor(result[3])+1
+            let index5=Math.floor(result[4])+1
+            
+            //alert("Your data is: " + $.trim(tableData[index1]) + " , " + $.trim(tableData[index2]) + " , " + $.trim(tableData[index3]));  
+             //alert(st_titles)
+            /*for(let [index,j] of st_titles.entries){
+                var objName='stat_title'+index
+
+            }*/
+
+            var entry1={
+            plr_num: $.trim(tableData[0]), 
+            plr_name: $.trim(tableData[1]), 
+            stat_title1: st_titles[0],   
+            stat_title2: st_titles[1],
+            stat_title3: st_titles[2],
+            stat_title4: st_titles[3],
+            stat_title5: st_titles[4],
+
+            stat1:$.trim(tableData[index1]),
+            stat2:$.trim(tableData[index2]),
+            stat3:$.trim(tableData[index3]),
+            stat4:$.trim(tableData[index4]),
+            stat5:$.trim(tableData[index5]),
+            message:"away_stat"
+            }; 
+            //check data flow
+            /*for (i in entry1) {
+                alert("Name: " + i + " Value: " + entry1[i]);} */
+            fetch(`${window.origin}/g_plr_stat`,{
+                method:"PATCH",
+                credentials:"include",
+                body: JSON.stringify(entry1),
+                cache: "no-cache",
+                headers: new Headers({
+                    "content-type":"application/json"
+                })
+    
+            }) 
+            .then(function(response){
+                if (response.status!==200){
+                    console.log(`Response status was not 200 "${response.status}`);
+                    alert("aldaa")
+                    return;
+                }
+                response.json().then(function (data){
+                    console.log(data)
+                })
+            }) 
+        });                                                                                  
+</script>  
+{% endblock%}    

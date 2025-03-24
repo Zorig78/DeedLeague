@@ -1,0 +1,17 @@
+1.Visual code deer virtual environment yysgene -- python -m venv venv
+2. .\venv\Scripts\activate script ajilluulna.Aldaa zaaval power shell neegeed (Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted) command unshuulna 
+3 flask.py file yysgeed test code oruulna.
+
+4.Command prompt deer
+set FLASK_APP=app.py
+set FLASK_DEBUG=1
+flask run
+
+
+
+5.flask_restful dotor json yavuulahdaa json={"likes": 10}
+
+dependency 
+	pip freeze > requirements.txt
+install 
+	pip install -r requirements.txt

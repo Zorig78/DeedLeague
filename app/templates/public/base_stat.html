@@ -1,0 +1,102 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %} Profile {% endblock %}
+
+{% block main %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>Barildaan</h1>
+            <hr>
+
+            <div class="mb-3">
+                <form action="/player_stat" method="POST" >   <!--  target="_blank" -->
+                    <div class="form-group">
+                        <label for="name1">Choose Home Team name:</label>
+                        <input type="text" class="form-control" id="name1" name="name1" placeholder="Enter wrestler1 name" list="ners">
+                        <label for="aimag">Select Wrestler1 state:</label>
+                        <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" name="w1_state">
+                            <option value="No">None</option>
+                            <option value="ETM">Эрдэнэт </option>
+                            <option value="SGA">SGA</option>
+                            <option value="DU">Дархан</option>
+                            <option value="SEL">Сэлэнгэ</option>
+                            <option value="HYL">Хүлгүүд</option>
+                            <option value="BCH">BCH</option>
+                            <option value="TLG">TLG</option>
+                            <option value="BM">Mетал</option>
+                            <option value="BIS">Налайх</option>
+                            <option value="BRO">Бродерс</option>
+                            <option value="AMZ">Амазонс</option>
+                            <option value="XAC">Омни</option>
+                            <option value="ARV">Аравт</option>
+                            <option value="MWX">Мвинкс</option>
+                            <option value="SPS">Cкорпионс</option>
+                            <option value="STS">Старс</option>
+                            
+
+                        </select> 
+                        fg<input type="checkbox" name="sel_col" value="1">  
+                        2pt<input type="checkbox" name="sel_col" value="2"> 
+                        3pt<input type="checkbox" name="sel_col" value="3"> 
+                        reb<input type="checkbox" name="sel_col" value="4">  
+                        ast<input type="checkbox" name="sel_col" value="5"> 
+                        stl<input type="checkbox" name="sel_col" value="6"> 
+                    <hr>    
+                    </div>
+                        <div class="form-group mb-3"> 
+                        <label for="lname">Wrestler 2 name:</label>
+                        <input type="text" class="form-control" id="name2" name="name2"  placeholder="Enter wrestler2 name" list="ners">
+                        <label for="aimag">Select Wrestler2 state:</label>
+                        <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" name="w2_state">
+                            <option value="No">None</option>
+                            <option value="Ар">Архангай</option>
+                            <option value="Хө">Хөвсгөл</option>
+                            <option value="Хо">Ховд</option>
+                            <option value="ГА">Говь-Алтай</option>
+                            <option value="БХ">Баянхонгор</option>
+                            <option value="Сэ">Сэлэнгэ</option>
+                            <option value="Өв">Өвөрхангай</option>
+                            <option value="Ув">Увс</option>
+                            <option value="Тө">Төв</option>
+                            <option value="Ду">Дундговь</option>
+                            <option value="За">Завхан</option>
+                            <option value="Сү">Сүхбаатар</option>
+                            <option value="Бу">Булган</option>
+                            <option value="Хэ">Хэнтий</option>
+                            <option value="Дор">Дорнод</option>
+                            <option value="БӨ">Баян-Өлгий</option>
+                            <option value="Өм">Өмнөговь</option>
+                            <option value="ГС">Говьсүмбэр</option>
+                            <option value="Да">Дархан-Уул</option>
+                            <option value="ДоГ">Дорноговь</option>
+                            <option value="Ор">Орхон</option>
+
+                        </select>  
+                    </div>  
+
+                    <input type="submit" value="Submit">
+                    <datalist id="ners">
+                
+                    </datalist> 
+        
+                  </form>
+            </div>           
+        </div>        
+    </div>
+</div>   
+{% endblock%}   
+{% block script %}
+<script>
+    fetch('http://127.0.0.1:5000/name_sug')
+                .then(res=>res.json())
+                .then(data=>{
+                    const datalist=document.getElementById('ners');
+                    data.forEach((obj)=>{
+                        const option=document.createElement('option');
+                        option.value=obj.b_name;
+                        datalist.appendChild(option);
+                    })
+                })
+</script>  
+{% endblock%}    

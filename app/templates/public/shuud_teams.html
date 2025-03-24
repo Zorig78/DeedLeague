@@ -1,0 +1,204 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %} Player Stat Live {% endblock %}
+
+{% block main %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>Багийн харьцуулсан стат</h1>
+            <hr>
+            <table id="TeamTable" class="display">
+                <thead>
+                  
+                    <tr> 
+                        {% for key,value in home_stat.items() %}
+                        <th>{{key}}</th> 
+                        {% endfor%}
+                    </tr>
+                                 
+                </thead>   
+                <tbody>             
+                    <tr id="home_row"> 
+                        {% for key,value in home_stat.items() %}
+                        <td>{{value}}</td> 
+                        {% endfor%}
+                    </tr>
+                    <tr id="away_row"> 
+                        {% for key,value in away_stat.items() %}
+                        <td>{{value}}</td> 
+                        {% endfor%}
+                    </tr>
+                    
+                </tbody>
+            </table>
+            <div style="background-color:rgb(70, 70, 70); color: rgb(255, 255, 255);">
+                <table >
+                    <tr>
+                         <td> <input type="checkbox" name="stat" value=1 class="check">PTS </td>
+                         <td> <input type="checkbox" name="stat" value=2 class="check">FG</td>
+                         <td> <input type="checkbox" name="stat" value=3 class="check">FG%</td>
+                         <td> <input type="checkbox" name="stat" value=4 class="check">2pt</td>
+                         <td> <input type="checkbox" name="stat" value=5 class="check">2pt%</td>
+                         <td> <input type="checkbox" name="stat" value=6 class="check">3pt</td>
+                         <td> <input type="checkbox" name="stat" value=7 class="check">3pt%</td>
+                         <td> <input type="checkbox" name="stat" value=8 class="check">FT</td>
+                         <td> <input type="checkbox" name="stat" value=9 class="check">FT%</td>
+                         <td> <input type="checkbox" name="stat" value=10 class="check">OFF REB</td>
+                         <td> <input type="checkbox" name="stat" value=11 class="check">DEF REB </td>
+                         <td><input type="checkbox" name="stat" value=12 class="check" >TOTAL REB</td>
+                         
+                    </tr>
+                    <tr>
+                        <td> <input type="checkbox" name="stat" value=13 class="check">ASSIST</td>
+                        <td> <input type="checkbox" name="stat" value=14 class="check">TURNOVER</td>
+                        <td><input type="checkbox" name="stat" value=15 class="check">STEAL</td>
+                        <td><input type="checkbox" name="stat" value=16 class="check">BLOCK</td>
+                        <td><input type="checkbox" name="stat" value=17 class="check">FOUL</td>
+                        <td><input type="checkbox" name="stat" value=18 class="check">Pts_F_TO</td>
+                        <td><input type="checkbox" name="stat" value=19 class="check">PAINT</td>
+                        <td><input type="checkbox" name="stat" value=20 class="check">2nd CHANCE</td>
+                        <td><input type="checkbox" name="stat" value=21 class="check">FAST</td>
+                        <td><input type="checkbox" name="stat" value=22 class="check">BENCH</td>
+                        <td><input type="checkbox" name="stat" value=23 class="check">LEAD</td>
+                        <td><input type="checkbox" name="stat" value=24 class="check">RUN<br></td>
+                    </tr>
+                </table> 
+            </div> 
+            <br>          
+             <button id="send" class="rounded1" onclick ="GetSelected()">SEND</button>
+            <br>
+            <h4>.</h4>
+        </div>        
+    </div>
+</div>   
+{% endblock%}   
+
+{% block script %}
+<script>
+ const team_stat_title = {0:"Short",1:'Оноо',2:'Довт', 3: 'Довт %',  4: '2 оноо', 5: '2 оноо %', 6: '3 оноо', 7: '3 оноо %',8: 'Ч/шид', 9: 'Ч/шид %',
+ 10:'Д/сам', 11: 'Х/сам', 12:'Сам', 13: 'Дамж', 14:'Б/алд', 15: 'Тас', 16: 'Хаалт', 17: 'Алд', 18: 'Б/а/оноо', 19: 'Буд/тал', 20: '2/Бол', 21: 'Хур/дов',
+  22: 'Сэл', 23: 'Тэрг', 24: 'Илүү'  }
+    var home_team_stat = [];
+    var guest_team_stat = [];
+    //table-iin home team morond baigaa cell-iin utguud-iig global array-d hadgalna
+    $("#home_row").each(function() {
+        var rowDataArray = [];
+        var actualData = $(this).find('td');
+        if (actualData.length > 0) {
+            actualData.each(function() {
+            rowDataArray.push($(this).text());
+            });
+            home_team_stat=rowDataArray;
+        }
+    });
+    //debug
+    //alert(home_team_stat[2]);
+    $("#away_row").each(function() {
+        var away_rowDataArray = [];
+        var g_actualData = $(this).find('td');
+        if (g_actualData.length > 0) {
+            g_actualData.each(function() {
+            away_rowDataArray.push($(this).text());
+            });
+            guest_team_stat=away_rowDataArray;
+        }
+    });
+    //debug
+    //alert(guest_team_stat[5]);
+
+$(document).ready( function () {
+            var atable=$('#TeamTable').DataTable(
+                            {paging: false,
+                            searching: false ,  
+                            scrollY: '20vh',
+                            ordering: false,
+                            scrollCollapse: false});
+                            
+                            } );   
+                            
+
+
+//check must be lower than 6
+var checks = document.querySelectorAll(".check");
+var max = 5;
+for (var i = 0; i < checks.length; i++)
+  checks[i].onclick = selectiveCheck;
+//disables check if it is greater than 5
+function selectiveCheck(event) {
+  var checkedChecks = document.querySelectorAll(".check:checked");
+  if (checkedChecks.length >= max + 1)
+    return false;
+    
+}
+
+function GetSelected() {
+        //Create an Array.
+        //Songogdson utguudiig hargalzah JS array-d onoono
+        var selected = new Array();
+        var chks = document.getElementsByName('stat')
+        var ht_sel_stat=new Array();
+        var gt_sel_stat=new Array();
+        for (var i = 0; i < chks.length; i++) {
+            if (chks[i].checked) {
+                selected.push(chks[i].value);
+                //alert(selected);
+                ht_sel_stat.push(home_team_stat[chks[i].value])
+                gt_sel_stat.push(guest_team_stat[chks[i].value])
+            }
+        }
+        //Harglazah Value-d Title onoono  
+        const st_titles = selected.map(equip => team_stat_title[equip] || '' );
+        
+        //Display the selected CheckBox values.
+        // Debug hiij array utgiig shalgah
+        /*if (selected.length > 0) {
+                    alert("Selected values: " + st_titles.join(","));
+                    alert("Selected values: " + ht_sel_stat.join(","));
+                }*/
+        var entry={
+            stat_title1: st_titles[0],   
+            stat_title2: st_titles[1],
+            stat_title3: st_titles[2],
+            stat_title4: st_titles[3],
+            stat_title5: st_titles[4],
+
+            ht_stat1:$.trim(ht_sel_stat[0]),
+            ht_stat2:$.trim(ht_sel_stat[1]),
+            ht_stat3:$.trim(ht_sel_stat[2]),
+            ht_stat4:$.trim(ht_sel_stat[3]),
+            ht_stat5:$.trim(ht_sel_stat[4]),
+
+            gt_stat1:$.trim(gt_sel_stat[0]),
+            gt_stat2:$.trim(gt_sel_stat[1]),
+            gt_stat3:$.trim(gt_sel_stat[2]),
+            gt_stat4:$.trim(gt_sel_stat[3]),
+            gt_stat5:$.trim(gt_sel_stat[4]),
+            message:"team_stat"
+            }; 
+            fetch(`${window.origin}/team_update_stat`,{
+                method:"PATCH",
+                credentials:"include",
+                body: JSON.stringify(entry),
+                cache: "no-cache",
+                headers: new Headers({
+                    "content-type":"application/json"
+                })
+    
+            }) 
+            .then(function(response){
+                if (response.status!==200){
+                    console.log(`Response status was not 200 "${response.status}`);
+                    alert("aldaa")
+                    return;
+                }
+                response.json().then(function (data){
+                    console.log(data)
+                    alert("stat Updated")
+                })
+            })       
+    }
+
+  
+</script>  
+{% endblock%}  

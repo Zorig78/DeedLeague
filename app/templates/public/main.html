@@ -1,0 +1,305 @@
+{% extends "public/templates/public_template.html" %}
+
+
+{% block title %} Home {% endblock %}
+{% block main %}
+<section id="how-it-works">
+    <div class="container">
+        <h2>Ажиллагааны товч тайлбар</h2>
+        <div class="flex">
+            <div>
+                <span class="fas fa-home"></span>
+                <h4>Шууд стат</h4>
+                <p>Fiba live stat-аас өгөгдөлийг хуулж аван тохирсон формат руу хөрвүүлнэ</p>
+            </div>
+            <div>
+                <span class="fas fa-calendar-plus"></span>
+                <h4>Дундаж стат</h4>
+                <p>Баг болон тоглогчдийн улирал болгонд үзүүлж буй амжилтуудын дундажыг боловсруулна</p>
+            </div>
+            <div>
+                <span class="fas fa-chart-line"></span>
+                <h4>Хяналт</h4>
+                <p>Барилдааны үргэлжилсэн хугацаа, давсан мэх зэрэг мэдээллийг оруулна.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="properties">
+    <div class="container">
+        <h2>БАГИЙН БҮРЭЛДЭХҮҮН</h2>
+        <div id="properties-slider" class="slick">
+            <div>
+                <img src="static/img/buh/otgonbaatar.jpg" alt="Property 1" />
+                <div class="property-details">
+                    <p class="price">Л.Отгонбаатар</p>
+                    <span class="beds">H:182 см</span>
+                    <span class="baths">W:110 кг</span>
+                    <span class="sqft">B:1993 </span>
+                    <address>
+                        Цэргийн арслан, Архангай
+                    </address>
+                </div>
+            </div>
+
+            <div>
+                <img src="static/img/buh/Н.Өсөхбаяр.jpg" alt="Property 1" />
+                <div class="property-details">
+                    <p class="price">Н.Өсөхбаяр</p>
+                    <span class="beds">H:186 см</span>
+                    <span class="baths">W:128 кг</span>
+                    <span class="sqft">B:1998</span>
+                    <address>
+                        Аймгийн арслан, Сүхбаатар
+                    </address>
+                </div>
+            </div>
+
+            <div>
+                <img src="static/img/buh/Э.Мөнхжаргал.jpg" alt="Property 1" />
+                <div class="property-details">
+                    <p class="price">Э.Мөнхжаргал</p>
+                    <span class="beds">H:180 см</span>
+                    <span class="baths">W:128 кг</span>
+                    <span class="sqft">B:1996</span>
+                    <address>
+                        Аймгийн арслан, Архангай
+                    </address>
+                </div>
+            </div>
+
+            <div>
+                <img src="static/img/buh/Ганбаатар.jpg" alt="Property 1" />
+                <div class="property-details">
+                    <p class="price">Г.Ганбаатар</p>
+                    <span class="beds">H:181 см</span>
+                    <span class="baths">W:125 кг</span>
+                    <span class="sqft">B:1988</span>
+                    <address>
+                        Аймгийн арслан, Булган
+                    </address>
+                </div>
+            </div>
+
+            <div>
+                <img src="static/img/buh/Э.Даваажаргал.jpg" alt="Property 1" />
+                <div class="property-details">
+                    <p class="price">Э.Даваажаргал</p>
+                    <span class="beds">H:178 см</span>
+                    <span class="baths">W:105 кг</span>
+                    <span class="sqft">B:1993</span>
+                    <address>
+                        Аймгийн арслан, Говь-Алтай
+                    </address>
+                </div>
+            </div>
+        </div>
+
+        <button class="rounded">Жагсаалтыг бүхлээр нь харах</button>
+    </div>
+</section>
+<section id="agents">
+    <div class="container">
+        <h2>Танилцуулга</h2>
+        <p class="large-paragraph"> Монгол наадмын түрүү үзүүрийг булаалдаж, наадамд зодоглосон хүчтэнүүдээс онцгойрон шалгарч түрүүлсэн аварга цолтонгууд.</p>
+        <div class="flex">
+            <div class="card">
+                <img src="static/img/buh/suhbat.jpg" alt="realtor1">
+                <h3> Агваансамдангийн Сүхбат</h3>
+                <p>Монгол улсын дархан аварга</p>
+
+            </div>
+            <div class="card">
+                <img src="static/img/buh/hangai.jpg" alt="realtor1">
+                <h3>Оргихын Хангай</h3>
+                <p>Монгол улсын аварга</p>
+
+            </div>
+            <div class="card">
+                <img src="static/img/buh/өсөхбаяр.jpg" alt="realtor1">
+                <h3> Гэлэгжамцын Өсөхбаяр</h3>
+                <p>Монгол улсын дархан аварга</p>
+
+            </div>
+            <div class="card">
+                <img src="static/img/buh/erhembayar.jpg" alt="realtor1">
+                <h3> Гунаажавын Эрхэмбаяр</h3>
+                <p>Монгол улсын аварга</p>
+
+            </div>
+            <div class="card">
+                <img src="static/img/buh/monhbat.jpg" alt="realtor1">
+                <h3> Сүхбаатарын Мөнхбат</h3>
+                <p>Монгол улсын аварга</p>
+
+            </div>
+            <div class="card">
+                <img src="static/img/buh/batsuuri.jpg" alt="realtor1">
+                <h3> Намсрайжавын Батсуурь</h3>
+                <p>Монгол улсын даян аварга</p>
+
+            </div>
+        </div>
+    </div>
+</section>
+<section id="the-best">
+
+    <div class="flex container">
+        <img src="static/img/page/web-development-banner.jpg" alt="Property 1" />
+        <div>
+            <h2>Үндэсний бөхийн шууд дамжуулалтын статистик</h2>
+            <p class="large-paragraph">Барилдаан үргэлжлэх хугацаанд бөхчүүдийн болон барилдааны мэдээллийг бүртгэж баазад хадгална.</p>
+            <p>Энэхүү мэдээллийг ашиглаж шууд дамжуулалтын үеэр үзүүлэх статистик үзүүлэлтүүдийг боловсруулна.</p>
+            <ul>
+                <li>Javascript object Notation based</li>
+                <li>Supporting Multiple users</li>
+                <li>Interchangeable rapid dataflow</li>
+                <li>Ease of scale-out information</li>
+                <li>Highly flexible database characteristic</li>
+            </ul>
+            <button class="rounded">Learn More</button>
+        </div>
+    </div>
+</section>
+<section id="services">
+    <div class="container">
+        <h2>Үйлчилгээ</h2>
+        <div class="flex">
+            <div>
+                <div class="fas fa-basketball-ball"></div>
+                <div class="services-card-right">
+                    <h3>PSN1</h3>
+                    <p>Сагсан бөмбөгийн 24 цагийн эфиртэй төрөлжсөн суваг.</p>
+                    <a href="#">Learn More</a>
+                </div>
+            </div>
+
+            <div>
+                <div  class="fas fa-futbol"></div>
+                <div class="services-card-right">
+                    <h3>PSN2</h3>
+                    <p>Хөлбөмбөгийн фанатуудад зориулсан сонирхолтой тоглолтууд болон мэдээ мэдээллийг цаг тухайд нь хүргэнэ.</p>
+                    <a href="#">Learn More</a>
+                </div>
+            </div>
+
+            <div>
+                <div class="fas fa-volleyball-ball"></div>
+                <div class="services-card-right">
+                    <h3>PSN3</h3>
+                    <p>Дотоодод болж буй тэмцээн уралдааныг шууд дамжуулж үзэгчдэд хүргэнэ.</p>
+                    <a href="#">Learn More</a>
+                </div>
+            </div>
+
+            <div>
+                <div class="fas fa-microphone-alt"></div>
+                <div class="services-card-right">
+                    <h3>PSN4</h3>
+                    <p>UFC болон ONE Championship гэх мэт тулааны урлагийн сонирхолтой тэмцээнийг үзүүлнэ.</p>
+                    <a href="#">Learn More</a>
+                </div>
+            </div>
+
+            <div>
+                <div class="fas fa-user-alt"></div>
+                <div class="services-card-right">
+                    <h3>PSN5</h3>
+                    <p>Сүүлийн үед маш их хөгжиж буй E-Sport түүнтэй холбоотой бүх мэдээ мэдээллийг хүлээн авах бололцоотой.</p>
+                    <a href="#">Learn More</a>
+                </div>
+            </div>
+
+            <div>
+                <div class="fas fa-mobile-alt"></div>
+                <div class="services-card-right">
+                    <h3>Premier Sports</h3>
+                    <p>Unitel group-ийн дэргэдэх спортын төрөлжсөн контент бэлтгэж дамжуулах үүрэгтэй компани.</p>
+                    <a href="#">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="testimonials">
+    <div class="container">
+        <h2>Товч агуулга</h2>
+        <div id="testimonials-slider">
+            <div>
+                <blockquote>
+                    <p>" Premier Sports телевиз төрөлжсөн таван сувгаар спортын агшин бүрийг танд хүргэнэ!" </p>
+
+                </blockquote>
+                <div class="testimonials-caption">
+                    <img src="static/img/page/Premier_Sports_Solid1.jpg" alt="Client 7" />
+                    <p>PSN Television</p>
+                </div>
+            </div>
+            <div>
+                <blockquote>
+                    <p>"Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia nostrum vitae explicabo
+                        dolore ratione. Quia iure quod ipsa blanditiis sint nulla a nam veritatis ex eos. Dicta
+                        molestiae dolorum laudantium."</p>
+                </blockquote>
+                <div class="testimonials-caption">
+                    <img src="https://onclickwebdesign.com/wp-content/uploads/person_5.jpg" alt="Client 7" />
+                    <p>Unitel group</p>
+                </div>
+            </div>
+
+            <div>
+                <blockquote>
+                    <p>"Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia nostrum vitae explicabo
+                        dolore ratione. Quia iure quod ipsa blanditiis sint nulla a nam veritatis ex eos. Dicta
+                        molestiae dolorum laudantium."</p>
+                </blockquote>
+                <div class="testimonials-caption">
+                    <img src="https://onclickwebdesign.com/wp-content/uploads/person_8.jpg" alt="Client 7" />
+                    <p>Fran Goldsmith</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+<section id="contact">
+    <div class="container">
+        <h2>ХОЛБОО БАРИХ</h2>
+
+        <div class="flex">
+            <div id="form-container">
+                <h3>Contact Form</h3>
+                <form>
+                    <label for="name">Нэр</label>
+                    <input type="text" id="name" />
+
+                    <label for="email">Email</label>
+                    <input type="text" id="email" />
+
+                    <label for="subject">Гарчиг</label>
+                    <input type="text" id="subject" />
+
+                    <label for="message">Зурвас</label>
+                    <textarea id="message">Write your message here..</textarea>
+
+                    <button class="rounded">ИЛГЭЭХ</button>
+                </form>
+            </div>
+
+            <div id="address-container">
+                <label>Хаяг</label>
+                <address>
+                    Сүхбаатар дүүрэг, 1-р хороо, Юнескогийн гудамж, Дипломат оффис,Улаанбаатар хот, Монгол улс
+                </address>
+
+                <label>Утас</label>
+                <a href="#">86117865</a>
+
+                <label>Email Address</label>
+                <a href="#">zorig@psn.mn</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
