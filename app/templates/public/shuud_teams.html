@@ -63,10 +63,19 @@
                         <td><input type="checkbox" name="stat" value=23 class="check">LEAD</td>
                         <td><input type="checkbox" name="stat" value=24 class="check">RUN<br></td>
                     </tr>
+                    <tr>
+                        <div id="stat_type_div" class="flex padding=10px">
+                        <select id="stat_type_sel" name="stat_types1" class="chooser">
+                            <option value="CG">  Current Game</option> 
+                            <option value="SA">  Season Average</option> 
+                        </select>
+                        </div>
+                    </tr>    
                 </table> 
             </div> 
             <br>          
              <button id="send" class="rounded1" onclick ="GetSelected()">SEND</button>
+             <button id="show" class="rounded1" onclick ="ShowSelected()">SHOW SIDE STAT</button>
             <br>
             <h4>.</h4>
         </div>        
@@ -136,8 +145,11 @@ function selectiveCheck(event) {
 function GetSelected() {
         //Create an Array.
         //Songogdson utguudiig hargalzah JS array-d onoono
+        
         var selected = new Array();
         var chks = document.getElementsByName('stat')
+        var type=$("#stat_type_sel").val()
+     
         var ht_sel_stat=new Array();
         var gt_sel_stat=new Array();
         for (var i = 0; i < chks.length; i++) {
@@ -175,6 +187,7 @@ function GetSelected() {
             gt_stat3:$.trim(gt_sel_stat[2]),
             gt_stat4:$.trim(gt_sel_stat[3]),
             gt_stat5:$.trim(gt_sel_stat[4]),
+            stat_type:type,
             message:"team_stat"
             }; 
             fetch(`${window.origin}/team_update_stat`,{
@@ -199,7 +212,30 @@ function GetSelected() {
                 })
             })       
     }
-
-  
+function ShowSelected() {
+    entry={
+        message:1,
+        start:1
+    }
+    fetch(`${window.origin}/show_side_stat`,{
+                method:"PATCH",
+                credentials:"include",
+                body: JSON.stringify(entry),
+                cache: "no-cache",
+                headers: new Headers({"content-type":"application/json"})
+    
+            }) 
+            .then(function(response){
+                if (response.status!==200){
+                    console.log(`Response status was not 200 "${response.status}`);
+                    alert("aldaa: "+response.status)
+                    return;
+                }
+                response.json().then(function (data){
+                    console.log(data)
+                    //alert("Flag Updated")
+                })
+            }) 
+} 
 </script>  
 {% endblock%}  

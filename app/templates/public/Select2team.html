@@ -7,14 +7,14 @@
     <h1>Select Your Teams</h1>
     
     <label for="team1">Choose Home Team:</label>
-    <select id="team1" name="team1">
+    <select id="team1" name="team1" class="rounded1">
         {% for key,value in team_names.items() %}
         <option value="{{value}}">{{value}}</option> 
         {% endfor%}
     </select>
     <br>
     <label for="team2">Choose Guest Team :</label>
-    <select id="team2" name="team2">
+    <select id="team2" name="team2" class="rounded1">
         {% for key,value in team_names.items() %}
         <option value="{{value}}">{{value}}</option> 
         {% endfor%}

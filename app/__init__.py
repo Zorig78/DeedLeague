@@ -85,21 +85,37 @@ def compare():
 def vs_update():
     try:
         if request.is_json:
+            team_vs_stat,com_stat=({},{})
             req=request.get_json()
-           
+            title_key=['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 
+                       't11', 't12', 't13', 't14', 't15', 't16', 't17', 't18']
+            title_val=['Оноо','Довт %','2 оноо %','3 оноо %','Ч/шид %','Довт/сам','Хам/сам','Самбар','Дамжуулалт','Б/алдалт',
+                'Таслалт','Хаалт','Алдаа','Бө/ал/оноо','Буд/тал','2/Бол','Хур/дов','Сэлгээ']
+            title_dic=dict(zip(title_key,title_val))
             home_team=req.get("team1")
             guest_team=req.get("team2")
             num_of_games=int(req.get("game_num"))
-                       
             h_tm_stat=two_team_meeting(home_team,guest_team,num_of_games)  
             a_tm_stat=two_team_meeting(guest_team,home_team,num_of_games)   
             if len(h_tm_stat):
                 home_avg_stat=h_tm_stat[-1]
                 h_tm_stat.pop(-1)
-                print(h_tm_stat)
-                print(home_avg_stat)
-                print(a_tm_stat[-1])    
-                print(get_title("avg_points"))                  
+                h_tm_stat.append({"n_game":num_of_games})           
+                for i in range(num_of_games):
+                    t=h_tm_stat[i]['date']
+                    gametime=t.strftime('%m/%d/%Y')
+                    h_tm_stat[i]['date']=gametime
+                team_vs_stat['matches']=h_tm_stat
+                team_vs_stat['titles']=title_dic
+                team_vs_stat['ht_avg']=home_avg_stat
+                team_vs_stat['ht_avg']['short']=find_brief(home_team)
+                team_vs_stat['gt_avg']=a_tm_stat[-1]  
+                team_vs_stat['gt_avg']['short']=find_brief(guest_team)  
+            com_stat['vs_stat']=team_vs_stat   
+            full_id={'_id':"full_stat"} 
+            h_plr_current={"$set":com_stat} 
+            dbResponse=mystat.update_one(full_id,h_plr_current)
+                                
             return Response(response=json.dumps("{message: vs stat updated }"),
             status=200,
             mimetype="application/json" )
@@ -168,8 +184,7 @@ def h_update_plr():
     try:
         if request.is_json:
             req=request.get_json()
-            titles=[]
-            stats=[]
+            titles,stats=([],[])
             plr_num=req.get("plr_num")
             plr_name=req.get("plr_name")
             #Aggregate hesgees ongorson bolon ene season-ii dundjiig tootsoh function duudne
@@ -193,9 +208,6 @@ def h_update_plr():
             status=200,
             mimetype="application/json" )     
     except Exception as ex:
-        print("*************")   
-        print(ex)
-        print("*************") 
         return Response(response=json.dumps("{message:cannot update player stat}"),
             status=500,
             mimetype="application/json"
@@ -208,8 +220,7 @@ def guest_update_plr():
     try:
         if request.is_json:
             req=request.get_json()
-            titles=[]
-            stats=[]
+            titles,stats=([],[])
             plr_num=req.get("plr_num")
             plr_name=req.get("plr_name")
             plr_last_stat=avg_plr_stat(plr_name,last_season)
@@ -244,8 +255,7 @@ def guest_update_plr():
 @app.route("/team_stat")   
 def h_update_team():
     #current game database-iin utgiig avna
-    home_stat={}
-    away_stat={}
+    home_stat,away_stat=({},{})
     teams=current_game.find_one() 
     #---------assign home team stat to dictionary
     ht_stat=teams["team1_stat"]
@@ -278,24 +288,20 @@ def h_update_team():
 def update_team():
     try:
         if request.is_json:
-            titles=[]
-            ht_stats=[]
-            ht_season_avg={}
-            ht_prev_avg={}
-            gt_season_avg={}
-            gt_prev_avg={}
-            gt_stats=[]
-            key_title=[]
+            titles,ht_stats,gt_stats,key_title=([],[],[],[])
+            ht_season_avg,ht_prev_avg,gt_season_avg,gt_prev_avg,screen_stat=({},{},{},{},{})
             req=request.get_json()
-            print(req) # debug for testing request
+            #print(req) # debug for testing request
             #-------get home and guest team names from current game database 
             curs=current_game.find_one()
             hteam=curs['t1_name']
             gteam=curs['t2_name']
+            stat_types=req.get("stat_type")
             for i in range(1,6):
                 titles.append(req.get("stat_title"+str(i)))
                 ht_stats.append(req.get("ht_stat"+str(i)))
                 gt_stats.append(req.get("gt_stat"+str(i)))
+            #database-d hadgalagdaj baigaa key-g olohdoo rev_title function ashiglana
             for tt in titles:
                 if tt!=None:
                     key_title.append(rev_title(tt))
@@ -321,38 +327,74 @@ def update_team():
             guest_stat_dict['gt_name']=guest_stat_dict.pop('plr_name')
             guest_stat_dict['g_short']=find_brief(gteam)
             guest_stat_dict.pop('plr_num')
-            print(home_stat_dict)
-            print(guest_stat_dict)              
-                 
-                
+            for ii in range(0,5):    
+                screen_stat['title'+str(ii)]=home_stat_dict['title'+str(ii)]
+                if stat_types=='SA':
+                    screen_stat['main_title']="Улиралын дундаж"
+                    screen_stat['ht_stat'+str(ii)]=home_stat_dict['avg_stat'+str(ii)]
+                    screen_stat['gt_stat'+str(ii)]=guest_stat_dict['avg_stat'+str(ii)]  
+                else:
+                    screen_stat['main_title']="Багийн статистик"
+                    screen_stat['ht_stat'+str(ii)]=home_stat_dict['stat'+str(ii)]
+                    screen_stat['gt_stat'+str(ii)]=guest_stat_dict['stat'+str(ii)]        
             
             cur_team_stat={
                 "cur_game_team_stat":{
                     "home_team":home_stat_dict,
                     "guest_team":guest_stat_dict,
+                    "screen_stat":screen_stat
                     }
             }
             full_id={'_id':"full_stat"} 
             h_plr_current={"$set":cur_team_stat} 
             dbResponse=mystat.update_one(full_id,h_plr_current)
-            #mystat.insert_one(h_plr_stat)  
-            print(cur_team_stat)
-            
-                       
-            #for attr in dir(dbResponse):
-            #    print(f"***************{attr}")
+           
             return Response(response=json.dumps("{message: home stat updated }"),
             status=200,
             mimetype="application/json"
         )     
     except Exception as ex:
-        print("*************")   
         print(ex)
-        print("*************") 
         return Response(response=json.dumps("{message:cannot reset}"),
             status=500,
             mimetype="application/json"
-        ) 
+        )
+@app.route("/show_side_stat",methods=["PATCH"])
+def show_side():
+    try:
+        val=5
+        cursor=mystat.find_one()
+        statis=cursor['cur_game_team_stat']['screen_stat']
+        print(statis['title0'])
+        if statis['title4']=="":
+            val=4 
+            if statis['title3']=="":
+                val=3
+                if statis['title2']=="":
+                    val=2 
+                    if statis['title1']=="":
+                        val=1 
+                        if statis['title0']=="":
+                            val=0   
+        print(val)   
+        full_id={'_id':"full_stat"} 
+        show_screen={"$set":{"side_scr":val}} 
+        hide_screen={"$set":{"side_scr":0}}
+        dbResponse=mystat.update_one(full_id,show_screen)  
+        time.sleep(10)
+        dbResponse=mystat.update_one(full_id,hide_screen)
+        
+        print(statis)
+        
+        return Response(response=json.dumps("{message: show stat successfull }"),
+            status=200,
+            mimetype="application/json")     
+    except Exception as ex:
+        return Response(response=json.dumps("{message:cannot show}"),
+            status=500,
+            mimetype="application/json"
+        )
+
 @app.route("/plr_avg")
 def sum_avg():
     #Odoo bolj baigaa togloltiin database-aas home,away bagiin short neriig avna
