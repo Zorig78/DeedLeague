@@ -38,7 +38,7 @@ for index,(k,v) in enumerate(tst.items()):
   #print(index , k, v )
 
 def avg_stat(season,team_name,stats):
-  stats=games_col.aggregate([
+  stat=games_col.aggregate([
     {'$match':
        { 'season':{'$in':season},
           '$or':[{"t1_name":team_name},{"t2_name":team_name}]
@@ -59,12 +59,52 @@ def avg_stat(season,team_name,stats):
           "_id":"$team_name",
           "sts": {'$avg':"$stats."+stats}
       }
-
+    },
+    {'$project':
+          {"_id":1,
+            "sts":{'$round': ["$sts", 1] }
+          }
     }
 
   ])  
   
-  return stats 
+  return stat 
+
+def team_avg_stat(season,team_name,stat_type):
+  comp_res={}
+  if stat_type=="t_fg":
+    s_part1="t_fg_made" 
+    s_part2="t_fg_attempt"
+  elif stat_type=="t_2p":
+    s_part1="t_two_p_made"
+    s_part2="t_two_p_attempt"
+  elif stat_type=="t_three":
+    s_part1="t_three_made"  
+    s_part2="t_three_attempt"
+  elif stat_type=="t_ft":
+    s_part1="t_ft_made" 
+    s_part2="t_ft_attempt" 
+  else:
+    s_part1=stat_type
+    s_part2=None     
+  if s_part2!=None:  
+    made_cursor=avg_stat(season,team_name,s_part1)
+    attempt_cursor=avg_stat(season,team_name,s_part2)     
+    for made in made_cursor:  
+      frst=made['sts']
+    for attempt in attempt_cursor:
+      second=attempt['sts']  
+    comp_res['_id']=team_name
+    comp_res['sts']=str(frst)+'/'+str(second) 
+  else: 
+    res_stat=avg_stat(season,team_name,stat_type) 
+    for tt in res_stat:
+      comp_res['_id']=team_name
+      comp_res['sts']=tt['sts']   
+
+  return comp_res     
+
+
 #Baguudiig hargalzah stat-aar jagsaaj tuhain stat-d hargalzah bair-iig butsaana  
 def stat_and_pos(t_name:str,a_stat_name):
   gg={}  
@@ -74,7 +114,7 @@ def stat_and_pos(t_name:str,a_stat_name):
     rt=avg_stat(["2025"],team,a_stat_name)
     #function-aas butssan dictionaryiin bytsiig oorchilj bagasgana {bag:stat} helbert oruulna 
     for gg in rt:
-      stat_dict.update({gg['_id']:round(gg['sts'],2)})
+      stat_dict.update({gg['_id']:gg['sts']})
   #baguudiin dundaj stat-iig ihees baga ruu erembelne    
   sorted_st=dict(sorted(stat_dict.items(), key=lambda x: x[1],reverse=True))
   #print(sorted_st)
@@ -107,17 +147,41 @@ for tm in teams_name:
     
 #print(t_list)
 
+
+
 """team_avg['s']=t_list 
 team_stats.append(team_avg)
 team_avg={} 
 team_avg['statistic']=t_list  
 team_stats.append(team_avg)
 team_avg={}"""
-#print(team_stats.encode('utf8'))  
+  
 
 #print(team_stats)  
 #print(stat_and_pos("СЭЛЭНГЭ БОДОНС","t_rebound"))
+
+# returns first teams average stats of 2 team's last 4 games
+# u can reverse the order of the teams to get the second team's average stats 
 def two_team_meeting(team1,team2,limit):
+  hariu=[]
+  two_team_games=games_col.aggregate([
+     {
+        '$match':{
+            '$or': [
+                {'$and': [{'t1_name': team1 }, {'t2_name': team2}] },
+                {'$and': [{'t1_name': team2 }, {'t2_name': team1}] }
+            ]
+          }
+    }, {
+        '$sort': {'date': -1}
+    }, {
+        '$limit': limit
+    }, {
+        '$project': {'_id':0,'date':1,'t1_name': 1, 't2_name': 1, 't1_score': 1, 't2_score': 1}
+    }
+  ])
+  for jj in two_team_games:
+    hariu.append(jj)
   two_avg_stat=games_col.aggregate([
     {
         '$match':
@@ -197,8 +261,8 @@ def two_team_meeting(team1,team2,limit):
         }
     }
   ])
-  return two_avg_stat  
+  for kk in two_avg_stat:
+    hariu.append(kk)
+  return hariu  
 
-rs=two_team_meeting("ЗАВХАН BROTHERS","ХАСЫН ХҮЛЭГҮҮД",4)
-for gg in rs:
-    print(gg)
+

@@ -1,0 +1,76 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %} Player Stat Live {% endblock %}
+
+{% block main %}
+<div class="container">
+    <h1>Select Your Teams</h1>
+    
+    <label for="team1">Choose Home Team:</label>
+    <select id="team1" name="team1">
+        {% for key,value in team_names.items() %}
+        <option value="{{value}}">{{value}}</option> 
+        {% endfor%}
+    </select>
+    <br>
+    <label for="team2">Choose Guest Team :</label>
+    <select id="team2" name="team2">
+        {% for key,value in team_names.items() %}
+        <option value="{{value}}">{{value}}</option> 
+        {% endfor%}
+    </select>
+    <br>
+    <label for="game_num">Choose Number of games :</label>
+    <select id="game_num" name="game_num">
+        {% for ii in range(1,6) %}
+        <option value="{{ii}}">Last {{ii}} games</option> 
+        {% endfor%}
+    </select>
+    <br>
+    <br>
+    <button id="send" class="rounded1" onclick ="GetSelected()"> COMPARE </button>
+    <br>
+    <br>
+    
+</div>
+{% endblock%}   
+
+{% block script %}
+<script>
+function GetSelected() 
+{
+    var team1 = document.getElementById("team1").value;
+    var team2 = document.getElementById("team2").value;
+    var game_num = document.getElementById("game_num").value;
+    alert(team1 + " " + team2 + " " + game_num);
+    var entry={
+                team1:team1,
+                team2:team2,
+                game_num:game_num,
+                message:"home_stat"
+            };
+    fetch(`${window.origin}/vs_stat`,{
+        method:"PATCH",
+        credentials:"include",
+        body: JSON.stringify(entry),
+        cache: "no-cache",
+        headers: new Headers({
+            "content-type":"application/json"
+        })
+
+    }) 
+    .then(function(response){
+        if (response.status!==200){
+            console.log(`Response status was not 200 "${response.status}`);
+            alert("aldaa")
+            return;
+        }
+        response.json().then(function (data){
+            console.log(data)
+            alert("stat Updated")
+        })
+    })               
+    //window.location.href = url;
+}
+</script>
+{% endblock%}   

@@ -4,6 +4,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select;
 from selenium.common.exceptions import TimeoutException
 import time
+from flask import render_template, request, redirect,jsonify
+from datetime import datetime
 import pandas as pd
 import csv
 from selenium.webdriver.support.color import Color
@@ -11,42 +13,48 @@ from selenium.common.exceptions import NoSuchElementException
 import pymongo
 import pprint
 from .links import import25
-global plr_stat,common_team_name,title_name
-def title_name(titler):
-    if titler in ["pts"]:
-        title_name="ОНОО"
-    elif titler in ["fg"]:
-        title_name="ДОВ"   
-    elif titler in ["fgp"]:
-        title_name="ДОВ% "  
-    elif titler in ["2p"]:
-        title_name="2Pt"   
-    elif titler in ["2pp"]:
-        title_name="2Pt%"    
-    elif titler in ["3p"]:
-        title_name="3pt"   
-    elif titler in ["3pp"]:
-        title_name="3pt%"    
-    elif titler in ["ft"]:
-        title_name="Ч/шид"   
-    elif titler in ["ftp"]:
-        title_name="Ч/шид%"   
-    elif titler in ["reb"]:
-        title_name="Сам"   
-    elif titler in ["ast"]:
-        title_name="Дам"  
-    elif titler in ["to"]:
-        title_name="Б/алд"   
-    elif titler in ["stl"]:
-        title_name="Тас" 
-    elif titler in ["blck"]:
-        title_name="Хаалт"   
-    elif titler in ["pl_min"]:
-        title_name="+/-"
-    elif titler=="":
-        title_name=""
+
+client=pymongo.MongoClient()
+mydb = client["DeedLeague"] 
+current_game=mydb['current_game']
+
+teams25_male=["БИШРЭЛТ МЕТАЛЛ","ЭРДЭНЭТ MINERS","INUT YES TLG","ХАСЫН ХҮЛЭГҮҮД","SG APES","ЗАВХАН BROTHERS","СЭЛЭНГЭ БОДОНС","BCH KNIGHTS","DARKHAN UNITED","НАЛАЙХ BISON"]
+team_stat=["t_points","t_fg_percent","t_two_p_percent","t_three_p_percent","t_ft_percent","t_offensive","t_defensive","t_rebound","t_assist","t_turnover",
+           "t_steal","t_block","t_foul","pts_f_to","pts_paint","two_c_p","pts_fast","pts_bench"]
+global plr_stat,common_team_name
+# assign appropriate title to the matching stat 
+def get_title(tit):
+    match_list=['date','t1_ner','avg_points','avg_fg_percent','avg_two_p_percent','avg_three_p_percent','avg_ft_percent',
+                'avg_offensive','avg_defensive','avg_rebound','avg_assist','avg_turnover','avg_steal','avg_block','avg_foul',
+                 'avg_pts_f_to','avg_pts_paint','avg_two_c_p','avg_pts_fast','avg_pts_bench',
+                 #player titles
+                 'pts','fg','fgp','2p','2pp','3p','3pp','ft','ftp','reb','ast','to','stl','blck','pl_min',
+                 #team_related
+                 'off_reb','def_reb','foul','p_f_to','p_paint','sec_chance','fast','bench','lead','run']
+    title_list=['Он сар','Нэр','Оноо','Довт %','2 оноо %','3 оноо %','Ч/шид %','Д/сам','Х/сам','Сам','Дамж','Б/алд',
+                'Тас','Хаалт','Алд','Б/а/оноо','Буд/тал','2/Бол','Хур/дов','Сэл',
+                'Оноо','Дов','Дов%','2Pt','2Pt%','3pt','3pt%','Ч/шид','Ч/шид%','Сам','Дам','Б/алд','Тас','Хаалт','+/-',
+                'Х/сам','Д/сам','Алд','Б/а/оноо','Буд/тал','2/Бол','Хур/дов','Сэл','lead','run']
+   
+    title_dict=dict(zip(match_list,title_list))
+    if tit=="":
+        title=""
+        return title
+    return title_dict[tit]
+# convert chosen title to database json key
+def rev_title(ti_name):
+    tit_list=['pts','fg','fgp','2p','2pp','3p','3pp','ft','ftp','off_reb','def_reb','reb','ast','to',
+                'stl','blck','foul','p_f_to','p_paint','sec_chance','fast','bench']
+    mat_list=["t_points","t_fg","t_fg_percent","t_2p","t_two_p_percent","t_three","t_three_p_percent","t_ft","t_ft_percent"
+              ,"t_offensive","t_defensive","t_rebound","t_assist","t_turnover","t_steal","t_block","t_foul","pts_f_to",
+              "pts_paint","two_c_p","pts_fast","pts_bench"]
+    rev_dict=dict(zip(tit_list,mat_list))
+    if ti_name=="":
+        title=""
+        return title
+    return rev_dict[ti_name]
  
-    return title_name                         
+ 
 
 def common_name(t_name):
     if t_name in ["ULAANBAATAR AMAZONS","УБ АМАЗОНС"]:
@@ -98,6 +106,214 @@ def find_brief(name):
         result="СЭЛ"                      
     
     return result 
+def add_current(link_game): 
+      
+        #PATH="C:\Program Files\chromedriver.exe"
+       
+        driver=webdriver.Chrome()
+        driver.maximize_window()
+       
+        driver.get(link_game)
+        #print(links23_male_post[gms]) #debug
+        # wait 3 seconds
+        time.sleep(1)
+        driver.find_element(By.XPATH,"//a[contains(@href,'bs.html')]").click()
+        time.sleep(1)
+        #collecting entire game stats
+
+        #scores by quarter
+        """team1_first_qtr=driver.find_element(By.XPATH,"//span[@id='aj_1_p1_score']").text 
+        team1_first_qtr=team1_first_qtr if(team1_first_qtr!="&nbsp") else 0
+        team1_second_qtr=driver.find_element(By.XPATH,"//span[@id='aj_1_p2_score']").text
+        team1_second_qtr=team1_second_qtr if(team1_second_qtr!="&nbsp") else 0
+        team1_third_qtr=driver.find_element(By.XPATH,"//span[@id='aj_1_p3_score']").text
+        team1_third_qtr=team1_third_qtr if(team1_third_qtr!="&nbsp") else 0
+        team1_fourth_qtr=driver.find_element(By.XPATH,"//span[@id='aj_1_p4_score']").text
+        team1_fourth_qtr=team1_fourth_qtr if(team1_fourth_qtr!="&nbsp") else 0
+        team1_ot_qtr=driver.find_element(By.XPATH,"//span[@id='aj_1_ot_score']").text
+        t1_ot=team1_ot_qtr if(team1_ot_qtr!="&nbsp") else 0
+        t1_qtr={
+            "first":int(team1_first_qtr),
+            "second":int(team1_second_qtr),
+            "third":int(team1_third_qtr),
+            "fourth":int(team1_fourth_qtr), 
+            "ot":int(t1_ot) 
+        }
+
+        team2_first_qtr=driver.find_element(By.XPATH,"//span[@id='aj_2_p1_score']").text
+        team2_first_qtr=team2_first_qtr if(team2_first_qtr!="&nbsp") else 0
+        team2_second_qtr=driver.find_element(By.XPATH,"//span[@id='aj_2_p2_score']").text
+        team2_second_qtr=team2_second_qtr if(team2_second_qtr!="&nbsp") else 0
+        team2_third_qtr=driver.find_element(By.XPATH,"//span[@id='aj_2_p3_score']").text
+        team2_third_qtr=team2_third_qtr if(team2_third_qtr!="&nbsp") else 0
+        team2_fourth_qtr=driver.find_element(By.XPATH,"//span[@id='aj_2_p4_score']").text
+        team2_fourth_qtr= team2_fourth_qtr if( team2_fourth_qtr!="&nbsp") else 0
+        team2_ot_qtr=driver.find_element(By.XPATH,"//span[@id='aj_2_ot_score']").text
+        t2_ot=team2_ot_qtr if(team2_ot_qtr!="&nbsp") else 0
+        t2_qtr={
+            "first":int(team2_first_qtr),
+            "second":int(team2_second_qtr),
+            "third":int(team2_third_qtr),
+            "fourth":int(team2_fourth_qtr), 
+            "ot":int(t2_ot) 
+        }   """
+
+        female_team=["ULAANBAATAR AMAZONS","УБ АМАЗОНС","OMNI KHULEGUUD","OMNI ХАСЫН ХҮЛЭГҮҮД","AO SCORPIONS","M WINX","STARS","Мон Пон","ARAVT","АРАВТ"]
+        team1_name=driver.find_element(By.XPATH,"//div[contains(@class,'team-0-bs')]/div[2]/span").text
+        if team1_name in female_team:
+            gender=0
+        else:
+            gender=1 
+        team1_common_name=common_name(team1_name)       
+        team1_score=int(driver.find_element(By.XPATH,"//div[contains(@class,'team team-0')]/div[5]/span").text)
+        team2_name=driver.find_element(By.XPATH,"//div[contains(@class,'team-1-bs')]/div[2]/span").text
+        team2_score=int(driver.find_element(By.XPATH,"//div[contains(@class,'team team-1')]/div[5]/span").text)
+        team2_common_name=common_name(team2_name)
+        if int(team1_score)>int(team2_score):
+            t1_win=1
+        else: 
+            t1_win=0
+        t2_win=1-t1_win 
+        imp_plr=0   
+        match_type=driver.find_element(By.XPATH,"//div[contains(@class,'matchDetails col col-12 align-center')]/div/p").text
+
+        game_details=date_str=driver.find_element(By.XPATH,"//div[contains(@class,'matchDetails col col-12 align-center')]/div[2]/h6").text
+        if(game_details=="GAME DETAILS"):
+            date_str=driver.find_element(By.XPATH,"//div[contains(@class,'matchDetails col col-12 align-center')]/div[2]/p").text
+        else:
+            date_str=driver.find_element(By.XPATH,"//div[contains(@class,'matchDetails col col-12 align-center')]/div[3]/p").text
+        dates=date_str.split()[-1]
+        date=dates.split("/")
+        date_string="20"+date[2]+"/"+date[1]+"/"+date[0]
+        format_string="%Y/%m/%d"
+        date_obj=datetime.strptime(date_string,format_string)
+
+            
+        #----------> collecting each player stat
+        rows1=driver.find_elements(By.XPATH,"//tbody[contains(@class,'on-court team-0-person-container')]/tr")
+        ## Эзэн багийн гарааны таван тоглогчийн статистик
+        num_of_rows=len(rows1)
+        t1_players=[]
+        t1_bench=[]
+        team1=[]
+        for kk in range(1,num_of_rows+1):
+            try:
+                xpath="//tbody[contains(@class,'on-court team-0-person-container')]/tr["+str(kk)+"]"
+                #xpath="//tbody[contains(@class,'on-court team-0-person-container')]/tr[2]"
+                sel_row=driver.find_element(By.XPATH,"//tbody[contains(@class,'on-court team-0-person-container')]/tr["+str(kk)+"]")
+                
+                if(sel_row.get_attribute("class"))!="player-row row-not-used":
+                    player=find_stat(driver,xpath,team1_common_name,1,t1_win)
+                    t1_players.append(player)
+                    #print(player)
+                    #current_game.insert_one(player)
+            except NoSuchElementException:
+                break  
+        rows2=driver.find_elements(By.XPATH,"//div[contains(@class,'boxscorewrap team-0-bs')]/table/tbody[2]/tr") 
+        num_of_rows2=len(rows2) 
+        for jj in range(1,num_of_rows2+1):  
+            try:
+                xpath1="//div[contains(@class,'boxscorewrap team-0-bs')]/table/tbody[2]/tr["+str(jj)+"]"
+                #xpath="//tbody[contains(@class,'on-court team-0-person-container')]/tr[2]"
+                sel_row1=driver.find_element(By.XPATH,"//div[contains(@class,'boxscorewrap team-0-bs')]/table/tbody[2]/tr["+str(jj)+"]")
+                
+                if(sel_row1.get_attribute("class"))!="player-row row-not-used":
+                    player1=find_stat(driver,xpath1,team1_common_name,0,t1_win)
+                    #print(player1)
+                    t1_players.append(player1)
+                    #current_game.insert_one(player1)
+            except NoSuchElementException:
+                break  
+        df=pd.DataFrame(t1_players)  
+        print(df)  
+        rows3=driver.find_element(By.XPATH,"//div[contains(@class,'boxscorewrap team-0-bs')]/table/tbody[3]/tr[2]")  
+        try:
+            xpath2="//div[contains(@class,'boxscorewrap team-0-bs')]/table/tbody[3]/tr[2]"
+            #xpath="//tbody[contains(@class,'on-court team-0-person-container')]/tr[2]"
+            sel_row2=driver.find_element(By.XPATH,"//div[contains(@class,'boxscorewrap team-0-bs')]/table/tbody[3]/tr[2]")
+            stat_path1="//div[contains(@class,'team-stats team-0-ts')]"
+            team1_data=find_team_stat(driver,xpath2,stat_path1)
+            team1.append(team1_data)
+            #print(team1)
+
+        except NoSuchElementException:
+            pass    
+
+
+        ######----------------------------------TEAM2------DETAIL--------------------------
+        rows_t2_1=driver.find_elements(By.XPATH,"//tbody[contains(@class,'on-court team-1-person-container')]/tr")
+        num_of_rows=len(rows_t2_1)
+        t2_players=[]
+        t2_bench=[]
+        team2=[]
+        for kk in range(1,100):
+            try:
+                xpath_t2="//tbody[contains(@class,'on-court team-1-person-container')]/tr["+str(kk)+"]"
+                sel_row_t2=driver.find_element(By.XPATH,"//tbody[contains(@class,'on-court team-0-person-container')]/tr["+str(kk)+"]")
+                
+                if(sel_row_t2.get_attribute("class"))!="player-row row-not-used":
+                    player_t2=find_stat(driver,xpath_t2,team2_common_name,1,t2_win)
+                    t1_players.append(player_t2)
+                
+            except NoSuchElementException:
+                break 
+        rows2_t2=driver.find_elements(By.XPATH,"//div[contains(@class,'boxscorewrap team-1-bs')]/table/tbody[2]/tr") 
+        num_of_rows2=len(rows2_t2) 
+        for jj in range(1,num_of_rows2+1):  
+            try:
+                xpath1_t2="//div[contains(@class,'boxscorewrap team-1-bs')]/table/tbody[2]/tr["+str(jj)+"]"
+                #xpath="//tbody[contains(@class,'on-court team-0-person-container')]/tr[2]"
+                sel_row1_t2=driver.find_element(By.XPATH,"//div[contains(@class,'boxscorewrap team-1-bs')]/table/tbody[2]/tr["+str(jj)+"]")
+                
+                if(sel_row1_t2.get_attribute("class"))!="player-row row-not-used":
+                    player1_t2=find_stat(driver,xpath1_t2,team2_common_name,0,t2_win)
+                    #print(player1)
+                    t1_players.append(player1_t2)
+                    #current_game.insert_one(player1)
+            except NoSuchElementException:
+                break  
+        rows3_t2=driver.find_element(By.XPATH,"//div[contains(@class,'boxscorewrap team-1-bs')]/table/tbody[3]/tr[2]")  
+        try:
+            xpath2_t2="//div[contains(@class,'boxscorewrap team-1-bs')]/table/tbody[3]/tr[2]"
+            #xpath="//tbody[contains(@class,'on-court team-0-person-container')]/tr[2]"
+            sel_row2=driver.find_element(By.XPATH,"//div[contains(@class,'boxscorewrap team-0-bs')]/table/tbody[3]/tr[2]")
+            stat_path2="//div[contains(@class,'team-stats team-1-ts')]"
+            team2_data=find_team_stat(driver,xpath2_t2,stat_path2)
+            team2.append(team2_data)
+            #print(team2)
+
+        except NoSuchElementException:
+            pass       
+
+        driver.quit()
+        ######----------------------------------add-to- dictionary----------------------------------------    
+        game={
+                "_id":   "ongoing",
+                "link"       : link_game,
+                "t1_name"    : team1_common_name,
+                "t1_score"   : team1_score,
+                "t2_name"    : team2_common_name,
+                "t2_score"   : team2_score,
+                "season"     : "post2025",
+                "male"       : gender, 
+                "date"       : date_obj,    
+                "t1_players" : t1_players,
+                "team1_stat" : team1_data,
+                "team2_stat" : team2_data,
+                
+                "t1_win"     : t1_win,
+                "t2_win"     : t2_win    
+                }
+            # "t1_qtr"     : t1_qtr,
+            # "t2_qtr"     : t2_qtr,
+        #game_rec=current_game.find_one({},{_id:1})
+        #print(game_rec)
+        update_query={'_id':"ongoing"}
+        update_operation={'$set':game}
+        current_game.update_one(update_query,update_operation)    
+        #current_game.insert_one(game)
+        return jsonify(game)
+
 def find_stat(driver,xipath,team1_name,starter,win):
     
     sel_row=driver.find_element(By.XPATH,xipath)
@@ -127,10 +343,14 @@ def find_stat(driver,xipath,team1_name,starter,win):
         turnover=sel_row.find_element(By.XPATH,".//td[19]/span").text
         steal=sel_row.find_element(By.XPATH,".//td[20]/span").text
         block=sel_row.find_element(By.XPATH,".//td[21]/span").text
-        blocker=sel_row.find_element(By.XPATH,".//td[22]/span").text
-        p_foul=sel_row.find_element(By.XPATH,".//td[23]/span").text
-        fouls_on=sel_row.find_element(By.XPATH,".//td[24]/span").text
-        min_plus=sel_row.find_element(By.XPATH,".//td[25]/span").text
+        blocker_hold=sel_row.find_element(By.XPATH,".//td[22]/span").text
+        blocker=0 if(blocker_hold=="") else blocker_hold
+        p_foul_holder=sel_row.find_element(By.XPATH,".//td[23]/span").text
+        p_foul=0 if(p_foul_holder=="") else p_foul_holder
+        fouls_on_holder=sel_row.find_element(By.XPATH,".//td[24]/span").text
+        fouls_on=0 if(fouls_on_holder=="") else fouls_on_holder
+        min_plus_holder=sel_row.find_element(By.XPATH,".//td[25]/span").text
+        min_plus=0 if(min_plus_holder=="") else min_plus_holder
 
         #print(number+"\n"+name+"\n"+pos+"\n"+minutes+"\n"+points+"\n"+field_goal+"\n"+two_p+"\n"+two_p_percent
         #        +"\n"+ft+"\n"+ft_percent+"\n"+offensive+"\n"+defensive+"\n"+rebound+"\n"+assist+"\n"+turnover+"\n"+steal+"\n"+block+"\n"+min_plus)
@@ -208,9 +428,12 @@ def find_team_stat(driver,xipath,stat_path):
     turnover=sel_row.find_element(By.XPATH,".//td[19]/span").text
     steal=sel_row.find_element(By.XPATH,".//td[20]/span").text
     block=sel_row.find_element(By.XPATH,".//td[21]/span").text
-    blocker=sel_row.find_element(By.XPATH,".//td[22]/span").text
-    p_foul=sel_row.find_element(By.XPATH,".//td[23]/span").text
-    fouls_on=sel_row.find_element(By.XPATH,".//td[24]/span").text
+    blocker_holder=sel_row.find_element(By.XPATH,".//td[22]/span").text
+    blocker=blocker_holder if(blocker_holder!="") else 0
+    p_foul_holder=sel_row.find_element(By.XPATH,".//td[23]/span").text
+    p_foul=p_foul_holder if(p_foul_holder!="") else 0
+    fouls_on_holder=sel_row.find_element(By.XPATH,".//td[24]/span").text
+    fouls_on=fouls_on_holder if(fouls_on_holder!="") else 0
     #min_plus=sel_row.find_element(By.XPATH,".//td[25]/span").text
 
     team_row=driver.find_element(By.XPATH,stat_path)
@@ -301,3 +524,59 @@ def find_list_value(title:list[str],cur1,seas_dict,prev_dict):
             temp="" if hooson else prev_dict[value]  
             previous.append(temp)
     return [tit,current,season,previous]
+
+
+"""[{$match:{'t1_players.import':1}},
+  {
+  $unwind:"$t1_players"
+},
+ {$group:
+  {
+   "_id":"$t1_players.p_name",
+    "pts":{$sum:"$t1_players.p_assist"}
+  } },
+  {$sort:{"pts":-1}}
+  
+ ]"""
+# get stat and title names assign to individual dictionary keys and values
+def assign_stat_to_dic(num,name,res_list):
+    st={}
+   
+    st["plr_num"]=num
+    st["plr_name"]=name
+       
+    for i in range(0,5):    
+        st["title"+str(i)]=get_title(res_list[0][i])
+        st["stat"+str(i)]=res_list[1][i]
+        st["avg_stat"+str(i)]=res_list[2][i]
+        st["prev_stat"+str(i)]=res_list[3][i]
+            
+    return(st)  
+def assign_team_stat_to_dict(teams_stat,team_names):
+    t_stat={}
+    t_stat['name']=team_names
+    t_stat['pts']=teams_stat['t_points']
+    t_stat['fg']=str(teams_stat['t_fg_made'])+"/"+str(teams_stat['t_fg_attempt'])
+    t_stat['fgp']=round(teams_stat['t_fg_percent'],1)
+    t_stat['2p']=str(teams_stat['t_two_p_made'])+"/"+str(teams_stat['t_two_p_attempt'])
+    t_stat['2pp']=round(teams_stat['t_two_p_percent'],1)
+    t_stat['3p']=str(teams_stat['t_three_made'])+"/"+str(teams_stat['t_three_attempt'])
+    t_stat['3pp']=round(teams_stat['t_three_p_percent'],1)
+    t_stat['ft']=str(teams_stat['t_ft_made'])+"/"+str(teams_stat['t_ft_attempt'])
+    t_stat['ftp']=round(teams_stat['t_ft_percent'],1)
+    t_stat['o/reb']=teams_stat['t_offensive']
+    t_stat['d/reb']=teams_stat['t_defensive']
+    t_stat['reb']=teams_stat['t_rebound']
+    t_stat['ast']=teams_stat['t_assist']
+    t_stat['to']=teams_stat['t_turnover']
+    t_stat['stl']=teams_stat['t_steal']
+    t_stat['blck']=teams_stat['t_block']
+    t_stat['foul']=teams_stat['t_foul']
+    t_stat['pts_f_to']=teams_stat['pts_f_to']
+    t_stat['pts_paint']=teams_stat['pts_paint']
+    t_stat['sec_c_pt']=teams_stat['two_c_p']
+    t_stat['pts_fast']=teams_stat['pts_fast']
+    t_stat['pts_bench']=teams_stat['pts_bench']
+    t_stat['lead']=teams_stat['lead']
+    t_stat['score_run']=teams_stat['score_run']  
+    return t_stat
